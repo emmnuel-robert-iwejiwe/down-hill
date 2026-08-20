@@ -24,7 +24,7 @@
 
 ### Feel And Physics
 
-- [ ] Tune acceleration, braking, drag, gravity, and max speed until driving feels more satisfying.
+- [ ] Tune acceleration, braking, drag, gravity, and max speed until driving feels more satisfying, add mite
 - [ ] Add wheel rotation so the car visually responds to movement.
 - [ ] Make uphill driving slower and downhill driving faster.
 - [ ] Add suspension bounce when landing.

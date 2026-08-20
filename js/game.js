@@ -90,6 +90,48 @@ const coinList = [];
 const fuelCanList = [];
 const floatingTexts = [];
 
+const vehicleSheet = new Image();
+let vehicleSheetReady = false;
+
+vehicleSheet.addEventListener("load", () => {
+    vehicleSheetReady = true;
+});
+
+vehicleSheet.src = "assets/sprites/vehicle/player-vehicle-sheet.png";
+
+const vehicleSprites = {
+    main: {
+        sx: 18,
+        sy: 18,
+        sw: 505,
+        sh: 340,
+        dw: 142,
+        dh: 96,
+        ox: -71,
+        oy: -67
+    },
+    damaged: {
+        sx: 555,
+        sy: 63,
+        sw: 475,
+        sh: 300,
+        dw: 142,
+        dh: 90,
+        ox: -71,
+        oy: -62
+    },
+    flipped: {
+        sx: 1045,
+        sy: 65,
+        sw: 465,
+        sh: 300,
+        dw: 142,
+        dh: 92,
+        ox: -71,
+        oy: -46
+    }
+};
+
 function generateTerrain() {
     terrain.length = 0;
 
@@ -323,6 +365,28 @@ function drawCar() {
     ctx.save();
     ctx.translate(screenX, car.y);
     ctx.rotate(car.angle);
+
+    if (vehicleSheetReady) {
+        const sprite =
+            gameState === "gameOver" && endTitle.textContent === "CRASHED"
+                ? vehicleSprites.damaged
+                : vehicleSprites.main;
+
+        ctx.drawImage(
+            vehicleSheet,
+            sprite.sx,
+            sprite.sy,
+            sprite.sw,
+            sprite.sh,
+            sprite.ox,
+            sprite.oy,
+            sprite.dw,
+            sprite.dh
+        );
+
+        ctx.restore();
+        return;
+    }
 
     ctx.fillStyle = "#e53935";
     ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
