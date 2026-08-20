@@ -31,6 +31,8 @@ canvas {
     z-index: 10;
 
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 15px;
 
     padding: 12px 20px;
@@ -43,7 +45,46 @@ canvas {
     font-size: 15px;
 }
 
-#gameOver {
+#pauseButton {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    z-index: 12;
+
+    width: 44px;
+    height: 44px;
+
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+#countdown {
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    font-size: 90px;
+    font-weight: bold;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+
+    pointer-events: none;
+}
+
+#gameOver,
+#pauseScreen {
     position: absolute;
     inset: 0;
 
@@ -59,17 +100,20 @@ canvas {
     text-align: center;
 }
 
-#gameOver h1 {
+#gameOver h1,
+#pauseScreen h1 {
     font-size: 45px;
     margin-bottom: 15px;
 }
 
-#gameOver p {
+#gameOver p,
+#pauseScreen p {
     margin: 5px;
     font-size: 20px;
 }
 
-#restart {
+#restart,
+#resume {
     margin-top: 20px;
     padding: 14px 30px;
 
@@ -83,6 +127,10 @@ canvas {
     font-weight: bold;
 
     cursor: pointer;
+}
+
+#resume {
+    background: #2e7d32;
 }
 
 .controls {
@@ -125,10 +173,24 @@ canvas {
 @media (max-width: 600px) {
 
     .hud {
-        width: 95%;
+        width: calc(100% - 75px);
+        left: 10px;
+        transform: none;
         justify-content: space-between;
         font-size: 12px;
         padding: 10px;
+        gap: 8px;
+    }
+
+    #pauseButton {
+        top: 12px;
+        right: 10px;
+        width: 42px;
+        height: 42px;
+    }
+
+    #countdown {
+        font-size: 70px;
     }
 
     .controls button {
@@ -136,7 +198,8 @@ canvas {
         height: 70px;
     }
 
-    #gameOver h1 {
+    #gameOver h1,
+    #pauseScreen h1 {
         font-size: 35px;
     }
 }
