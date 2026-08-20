@@ -44,15 +44,24 @@ Use a mixed approach:
 - [x] Exhaust pipe
 - [x] Exhaust smoke
 
-Source file:
+Runtime files:
 
-- `assets/sprites/vehicle/player-vehicle-sheet.png`
+- `assets/sprites/vehicle/bodies/`
+- `assets/sprites/vehicle/drivers/`
+- `assets/sprites/vehicle/parts/`
+- `assets/sprites/vehicle/effects/`
 
 Implementation status:
 
-- [x] Game uses the vehicle sprite sheet for the main player car.
+- [x] Game uses separate grouped vehicle image files for the main player car.
 - [x] Game uses the damaged vehicle sprite on crash.
-- [ ] Split the sheet into individual transparent PNG files if we need direct per-part animation.
+- [x] Game uses layered body, driver, suspension, exhaust, and wheel rendering.
+- [x] Wheels rotate based on driving speed.
+- [x] Driver pose changes for idle, acceleration, braking, flips, and crash.
+- [x] Suspension compresses on landing and rough driving.
+- [x] Exhaust smoke and wheel dust particles are active.
+- [x] Crash impact adds dust and screen shake.
+- [x] Split runtime sprites into individual transparent PNG files.
 
 ## Vehicle Animation Sprites
 

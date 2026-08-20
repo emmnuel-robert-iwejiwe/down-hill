@@ -59,6 +59,12 @@ let coins = 0;
 let score = 0;
 let fuel = MAX_FUEL;
 let speed = 0;
+let wheelRotation = 0;
+let suspensionCompression = 0;
+let landingImpact = 0;
+let crashTimer = 0;
+let smokeTimer = 0;
+let dustTimer = 0;
 let airtime = 0;
 let completedFlip = false;
 let previousGrounded = false;
@@ -89,48 +95,34 @@ const terrain = [];
 const coinList = [];
 const fuelCanList = [];
 const floatingTexts = [];
+const particles = [];
 
-const vehicleSheet = new Image();
-let vehicleSheetReady = false;
-
-vehicleSheet.addEventListener("load", () => {
-    vehicleSheetReady = true;
-});
-
-vehicleSheet.src = "assets/sprites/vehicle/player-vehicle-sheet.png";
-
-const vehicleSprites = {
-    main: {
-        sx: 18,
-        sy: 18,
-        sw: 505,
-        sh: 340,
-        dw: 142,
-        dh: 96,
-        ox: -71,
-        oy: -67
-    },
-    damaged: {
-        sx: 555,
-        sy: 63,
-        sw: 475,
-        sh: 300,
-        dw: 142,
-        dh: 90,
-        ox: -71,
-        oy: -62
-    },
-    flipped: {
-        sx: 1045,
-        sy: 65,
-        sw: 465,
-        sh: 300,
-        dw: 142,
-        dh: 92,
-        ox: -71,
-        oy: -46
-    }
+const vehicleImages = {
+    body: loadVehicleImage("assets/sprites/vehicle/bodies/car-body.png"),
+    bodyDamaged: loadVehicleImage("assets/sprites/vehicle/bodies/car-body-damaged.png"),
+    bodyFlipped: loadVehicleImage("assets/sprites/vehicle/bodies/car-body-flipped.png"),
+    driverIdle: loadVehicleImage("assets/sprites/vehicle/drivers/driver-idle.png"),
+    driverLeanBack: loadVehicleImage("assets/sprites/vehicle/drivers/driver-lean-back.png"),
+    driverLeanForward: loadVehicleImage("assets/sprites/vehicle/drivers/driver-lean-forward.png"),
+    driverPanic: loadVehicleImage("assets/sprites/vehicle/drivers/driver-panic.png"),
+    frontWheel: loadVehicleImage("assets/sprites/vehicle/parts/front-wheel.png"),
+    rearWheel: loadVehicleImage("assets/sprites/vehicle/parts/rear-wheel.png"),
+    suspension: loadVehicleImage("assets/sprites/vehicle/parts/suspension.png"),
+    exhaustPipe: loadVehicleImage("assets/sprites/vehicle/parts/exhaust-pipe.png"),
+    smokeSmall: loadVehicleImage("assets/sprites/vehicle/effects/exhaust-smoke-small.png"),
+    smokeMedium: loadVehicleImage("assets/sprites/vehicle/effects/exhaust-smoke-medium.png"),
+    smokeLarge: loadVehicleImage("assets/sprites/vehicle/effects/exhaust-smoke-large.png")
 };
+
+function loadVehicleImage(src) {
+    const image = new Image();
+    image.src = src;
+    return image;
+}
+
+function vehicleImagesReady() {
+    return Object.values(vehicleImages).every(image => image.complete && image.naturalWidth > 0);
+}
 
 function generateTerrain() {
     terrain.length = 0;
@@ -182,6 +174,22 @@ function getTerrainAngle(x) {
     const y2 = getGroundY(x + 10);
 
     return Math.atan2(y2 - y1, 20);
+}
+
+function getWheelContact() {
+    const rearX = car.x - 43;
+    const frontX = car.x + 45;
+    const rearY = getGroundY(rearX);
+    const frontY = getGroundY(frontX);
+
+    return {
+        rearX,
+        frontX,
+        rearY,
+        frontY,
+        centerY: Math.min(rearY, frontY) - car.height / 2 - 15,
+        angle: Math.atan2(frontY - rearY, frontX - rearX)
+    };
 }
 
 function positionItems() {
@@ -366,24 +374,18 @@ function drawCar() {
     ctx.translate(screenX, car.y);
     ctx.rotate(car.angle);
 
-    if (vehicleSheetReady) {
-        const sprite =
-            gameState === "gameOver" && endTitle.textContent === "CRASHED"
-                ? vehicleSprites.damaged
-                : vehicleSprites.main;
+    if (vehicleImagesReady()) {
+        const compression = suspensionCompression + landingImpact;
+        const wheelDrop = -compression * 7;
+        const bodyDrop = compression * 3;
 
-        ctx.drawImage(
-            vehicleSheet,
-            sprite.sx,
-            sprite.sy,
-            sprite.sw,
-            sprite.sh,
-            sprite.ox,
-            sprite.oy,
-            sprite.dw,
-            sprite.dh
-        );
-
+        drawImage(getBodyImage(), -86, -64 + bodyDrop, 172, 94);
+        drawImage(vehicleImages.exhaustPipe, -96, -12 + bodyDrop, 40, 24);
+        drawSuspension(-45, 8 + bodyDrop, -0.12, compression);
+        drawSuspension(47, 8 + bodyDrop, 0.12, compression);
+        drawDriverSprite();
+        drawRotatingImage(vehicleImages.rearWheel, -45, 23 + wheelDrop, 52, 52, wheelRotation);
+        drawRotatingImage(vehicleImages.frontWheel, 47, 23 + wheelDrop, 52, 52, wheelRotation);
         ctx.restore();
         return;
     }
@@ -408,6 +410,213 @@ function drawCar() {
     drawWheel(27, 18);
 
     ctx.restore();
+}
+
+function drawSuspension(centerX, centerY, rotation, compression) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(rotation);
+    ctx.scale(1, Math.max(0.72, 1 - compression * 0.24));
+    drawImage(vehicleImages.suspension, -9, -21, 18, 42);
+    ctx.restore();
+}
+
+function getBodyImage() {
+    if (gameState === "gameOver" && endTitle.textContent === "CRASHED") {
+        return vehicleImages.bodyDamaged;
+    }
+
+    if (Math.abs(car.angle) > Math.PI * 0.55 && !car.grounded) {
+        return vehicleImages.bodyFlipped;
+    }
+
+    return vehicleImages.body;
+}
+
+function drawDriverSprite() {
+    const image = getDriverImage();
+    const leanOffset = getDriverLeanOffset();
+
+    drawImage(
+        image,
+        -35 + leanOffset.x,
+        -85 + leanOffset.y,
+        76,
+        78
+    );
+}
+
+function getDriverImage() {
+    if (gameState === "gameOver" || (!car.grounded && Math.abs(car.angle) > Math.PI * 0.55)) {
+        return vehicleImages.driverPanic;
+    }
+
+    if (brakePressed || speed < -0.4) {
+        return vehicleImages.driverLeanForward;
+    }
+
+    if (gasPressed || speed > 2.4) {
+        return vehicleImages.driverLeanBack;
+    }
+
+    return vehicleImages.driverIdle;
+}
+
+function getDriverLeanOffset() {
+    if (brakePressed || speed < -0.4) {
+        return { x: 5, y: 3 };
+    }
+
+    if (gasPressed || speed > 2.4) {
+        return { x: -4, y: -1 };
+    }
+
+    return { x: 0, y: 0 };
+}
+
+function drawImage(image, x, y, drawWidth, drawHeight) {
+    ctx.drawImage(image, x, y, drawWidth, drawHeight);
+}
+
+function drawRotatingImage(image, centerX, centerY, drawWidth, drawHeight, rotation) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(rotation);
+    drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+    ctx.restore();
+}
+
+function addParticle(type, x, y, velocityX, velocityY, size, life) {
+    particles.push({
+        type,
+        x,
+        y,
+        velocityX,
+        velocityY,
+        size,
+        life,
+        maxLife: life,
+        rotation: Math.random() * Math.PI * 2
+    });
+}
+
+function emitExhaustSmoke(dt) {
+    if (!gasPressed || fuel <= 0) return;
+
+    smokeTimer -= dt;
+
+    if (smokeTimer > 0) return;
+
+    const exhaustX = car.x - 72 * Math.cos(car.angle) + 12 * Math.sin(car.angle);
+    const exhaustY = car.y - 72 * Math.sin(car.angle) - 12 * Math.cos(car.angle);
+
+    addParticle(
+        "smoke",
+        exhaustX,
+        exhaustY,
+        -0.8 - Math.random() * 0.7,
+        -0.35 - Math.random() * 0.25,
+        20 + Math.random() * 14,
+        55
+    );
+
+    smokeTimer = Math.max(3, 10 - Math.abs(speed));
+}
+
+function emitWheelDust(dt) {
+    if (!car.grounded || Math.abs(speed) < 0.7) return;
+
+    dustTimer -= dt;
+
+    if (dustTimer > 0) return;
+
+    const rearWheelX = car.x - 43 * Math.cos(car.angle) - 23 * Math.sin(car.angle);
+    const rearWheelY = car.y - 43 * Math.sin(car.angle) + 23 * Math.cos(car.angle);
+
+    addParticle(
+        "dust",
+        rearWheelX,
+        rearWheelY + 8,
+        -Math.sign(speed || 1) * (0.7 + Math.random() * 0.7),
+        -0.25 - Math.random() * 0.4,
+        11 + Math.random() * 10,
+        34
+    );
+
+    dustTimer = Math.max(2, 8 - Math.abs(speed) * 0.6);
+}
+
+function emitLandingDust(impact) {
+    const amount = Math.min(14, 4 + Math.floor(impact * 2));
+
+    for (let i = 0; i < amount; i++) {
+        addParticle(
+            "dust",
+            car.x - 40 + Math.random() * 80,
+            car.y + 28,
+            -1.4 + Math.random() * 2.8,
+            -0.5 - Math.random() * 1.1,
+            14 + Math.random() * 16,
+            42 + Math.random() * 18
+        );
+    }
+}
+
+function emitCrashDust() {
+    for (let i = 0; i < 22; i++) {
+        addParticle(
+            "dust",
+            car.x - 55 + Math.random() * 110,
+            car.y + 5 + Math.random() * 40,
+            -2.2 + Math.random() * 4.4,
+            -1.5 - Math.random() * 1.6,
+            16 + Math.random() * 24,
+            55 + Math.random() * 25
+        );
+    }
+}
+
+function updateParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const particle = particles[i];
+
+        particle.x += particle.velocityX * dt;
+        particle.y += particle.velocityY * dt;
+        particle.velocityY += particle.type === "dust" ? 0.018 * dt : -0.004 * dt;
+        particle.life -= dt;
+
+        if (particle.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
+function drawParticles() {
+    particles.forEach(particle => {
+        const screenX = particle.x - cameraX;
+        const alpha = Math.max(0, particle.life / particle.maxLife);
+
+        if (particle.type === "smoke" && vehicleImagesReady()) {
+            const image = alpha > 0.66
+                ? vehicleImages.smokeSmall
+                : alpha > 0.33
+                    ? vehicleImages.smokeMedium
+                    : vehicleImages.smokeLarge;
+
+            ctx.save();
+            ctx.globalAlpha = alpha * 0.8;
+            ctx.translate(screenX, particle.y);
+            ctx.rotate(particle.rotation);
+            drawImage(image, -particle.size / 2, -particle.size / 2, particle.size, particle.size);
+            ctx.restore();
+            return;
+        }
+
+        ctx.fillStyle = `rgba(118, 86, 55, ${alpha * 0.45})`;
+        ctx.beginPath();
+        ctx.arc(screenX, particle.y, particle.size * (1 - alpha * 0.25), 0, Math.PI * 2);
+        ctx.fill();
+    });
 }
 
 function drawWheel(x, y) {
@@ -441,7 +650,10 @@ function updateCountdown(now) {
 }
 
 function updateCar(dt) {
-    if (gameState !== "running") return;
+    if (gameState !== "running") {
+        updateParticles(dt);
+        return;
+    }
 
     if (gasPressed && fuel > 0) {
         speed += physics.acceleration * dt;
@@ -452,28 +664,37 @@ function updateCar(dt) {
         speed -= physics.acceleration * 1.4 * dt;
     }
 
-    const slope = getTerrainAngle(car.x);
-    speed += Math.sin(slope) * 0.025 * dt;
+    const contact = getWheelContact();
+    speed += Math.sin(contact.angle) * 0.025 * dt;
     speed *= Math.pow(physics.drag, dt);
     speed = Math.max(physics.maxReverseSpeed, Math.min(speed, physics.maxForwardSpeed));
 
     car.x += speed * dt;
+    wheelRotation += speed * 0.11 * dt;
     car.velocityY += physics.gravity * dt;
     car.y += car.velocityY * dt;
 
-    const groundY = getGroundY(car.x);
-    const targetY = groundY - car.height / 2 - 15;
+    const nextContact = getWheelContact();
+    const targetY = nextContact.centerY;
 
     previousGrounded = car.grounded;
 
     if (car.y >= targetY) {
+        const impactStrength = Math.max(0, car.velocityY);
+
         car.y = targetY;
         car.velocityY = 0;
         car.grounded = true;
-        car.angle += (slope - car.angle) * 0.15 * dt;
+        car.angle += (nextContact.angle - car.angle) * 0.15 * dt;
         car.angularVelocity = 0;
+        suspensionCompression = Math.max(
+            suspensionCompression,
+            Math.min(1, Math.abs(speed) * 0.03 + impactStrength * 0.05)
+        );
 
         if (!previousGrounded) {
+            landingImpact = Math.min(1.2, impactStrength * 0.08);
+            emitLandingDust(impactStrength);
             awardLandingBonus();
         }
     } else {
@@ -495,6 +716,13 @@ function updateCar(dt) {
             completedFlip = true;
         }
     }
+
+    suspensionCompression *= Math.pow(0.9, dt);
+    landingImpact *= Math.pow(0.82, dt);
+
+    emitExhaustSmoke(dt);
+    emitWheelDust(dt);
+    updateParticles(dt);
 
     cameraX = Math.max(0, car.x - width * 0.3);
     distance = Math.max(0, Math.floor(car.x / 10));
@@ -620,6 +848,13 @@ function endGame(title) {
     gasPressed = false;
     brakePressed = false;
 
+    if (title === "CRASHED") {
+        crashTimer = 36;
+        landingImpact = 1.2;
+        suspensionCompression = 1;
+        emitCrashDust();
+    }
+
     endTitle.textContent = title;
     finalDistance.textContent = distance;
     finalCoins.textContent = coins;
@@ -657,6 +892,12 @@ function restartGame() {
     score = 0;
     fuel = MAX_FUEL;
     speed = 0;
+    wheelRotation = 0;
+    suspensionCompression = 0;
+    landingImpact = 0;
+    crashTimer = 0;
+    smokeTimer = 0;
+    dustTimer = 0;
     cameraX = 0;
     airtime = 0;
     completedFlip = false;
@@ -672,6 +913,7 @@ function restartGame() {
     generateTerrain();
     positionItems();
     floatingTexts.length = 0;
+    particles.length = 0;
 
     updateHud();
     gameOverScreen.style.display = "none";
@@ -743,12 +985,26 @@ resumeButton.addEventListener("click", resumeGame);
 restartButton.addEventListener("click", restartGame);
 
 function drawGame() {
+    ctx.save();
+
+    if (crashTimer > 0) {
+        const shake = crashTimer * 0.22;
+        ctx.translate(
+            (Math.random() - 0.5) * shake,
+            (Math.random() - 0.5) * shake
+        );
+        crashTimer -= 1;
+    }
+
     drawBackground();
     drawTerrain();
+    drawParticles();
     drawCoins();
     drawFuelCans();
     drawCar();
     drawFloatingTexts();
+
+    ctx.restore();
 }
 
 function gameLoop(now) {
