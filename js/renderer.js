@@ -2,6 +2,7 @@ window.App = window.App || {};
 
 App.createRenderer = function createRenderer(ctx) {
     const { colors, collision, car: carConfig, level } = App.CONSTANTS;
+    const collectibles = App.assets.collectibles;
     const vehicle = App.assets.vehicle;
 
     function drawImage(image, x, y, drawWidth, drawHeight) {
@@ -99,6 +100,11 @@ App.createRenderer = function createRenderer(ctx) {
 
             const screenX = coin.x - state.cameraX;
             if (screenX < -30 || screenX > state.width + 30) return;
+
+            if (collectibles.coin.complete && collectibles.coin.naturalWidth > 0) {
+                drawImage(collectibles.coin, screenX - 15, coin.y - 15, 30, 30);
+                return;
+            }
 
             ctx.fillStyle = colors.coin;
             ctx.beginPath();

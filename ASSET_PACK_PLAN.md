@@ -81,7 +81,7 @@ Implementation status:
 
 ## Collectibles
 
-- [ ] Coin
+- [x] Coin
 - [ ] Coin animation frame 1
 - [ ] Coin animation frame 2
 - [ ] Coin animation frame 3

@@ -7,6 +7,9 @@ App.loadImage = function loadImage(src) {
 };
 
 App.assets = {
+    collectibles: {
+        coin: App.loadImage("assets/sprites/items/coin.png")
+    },
     vehicle: {
         body: App.loadImage("assets/sprites/vehicle/bodies/car-body.png"),
         bodyDamaged: App.loadImage("assets/sprites/vehicle/bodies/car-body-damaged.png"),
