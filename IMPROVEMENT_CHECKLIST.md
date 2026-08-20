@@ -14,13 +14,13 @@
 
 ### Gameplay
 
-- [ ] Add fuel cans on the track so the player can recover fuel.
-- [ ] Add a stronger win/goal condition, such as reaching 2,000m or finishing a level.
-- [ ] Add ramps, steeper hills, dips, and danger zones to make terrain less repetitive.
-- [ ] Add coin patterns instead of placing every coin at the same interval.
-- [ ] Add score bonuses for airtime, flips, long jumps, and smooth landings.
-- [ ] Add a countdown or ready state before the game starts.
-- [ ] Add pause and resume.
+- [x] Add fuel cans on the track so the player can recover fuel.
+- [x] Add a stronger win/goal condition, such as reaching 2,000m or finishing a level.
+- [x] Add ramps, steeper hills, dips, and danger zones to make terrain less repetitive.
+- [x] Add coin patterns instead of placing every coin at the same interval.
+- [x] Add score bonuses for airtime, flips, long jumps, and smooth landings.
+- [x] Add a countdown or ready state before the game starts.
+- [x] Add pause and resume.
 
 ### Feel And Physics
 
