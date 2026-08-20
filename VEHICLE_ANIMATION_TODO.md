@@ -5,13 +5,14 @@ Goal: make the car feel more alive, readable, and responsive before building the
 ## Current State
 
 - [x] One generated vehicle sprite sheet exists.
-- [x] Game renders the main car from the sprite sheet.
+- [x] Game renders the main car from grouped image files.
 - [x] Game can show a damaged car sprite on crash.
 - [x] Wheel rotation is animated.
 - [x] Driver leaning is animated.
-- [ ] Suspension is not animated yet.
-- [ ] Exhaust smoke is not connected to acceleration yet.
-- [ ] Landing and crash states need stronger visual feedback.
+- [x] Suspension compression is animated.
+- [x] Exhaust smoke is connected to acceleration.
+- [x] Landing and crash states have dust and crash shake feedback.
+- [ ] Several non-wheel vehicle assets still need true transparent standalone regeneration.
 
 Current runtime sprite folders:
 
@@ -27,8 +28,9 @@ Current runtime sprite folders:
 - [x] Export at consistent scale.
 - [x] Keep the car facing right in all normal driving frames.
 - [x] Keep wheels, suspension, driver, and exhaust as separate usable pieces.
-- [x] Avoid baked-in background glow or shadows.
+- [ ] Avoid baked-in background glow or shadows in final standalone body/driver/part files.
 - [x] Add enough transparent padding so rotated sprites do not clip.
+- [x] Replace cut wheel crops with clean standalone full wheel sprites.
 
 ## Needed Vehicle Sprite Parts
 
@@ -65,6 +67,8 @@ Current runtime sprite folders:
 - [x] Crash frame 2
 - [ ] Crash frame 3
 
+Note: the full-frame animation concepts were generated, but the runtime currently uses layered procedural animation instead of these full car frames.
+
 ## Animation Behaviors To Add
 
 - [x] Rotate wheels based on horizontal speed.
@@ -74,13 +78,13 @@ Current runtime sprite folders:
 - [x] Show driver leaning backward when accelerating or climbing.
 - [x] Show panic driver frame during flips or crash.
 - [x] Compress suspension on landing.
-- [ ] Compress front suspension on front-wheel impact.
-- [ ] Compress rear suspension on rear-wheel impact.
+- [ ] Compress front suspension independently on front-wheel impact.
+- [ ] Compress rear suspension independently on rear-wheel impact.
 - [x] Emit exhaust smoke while gas is pressed.
 - [x] Emit dust from wheels when driving on terrain.
 - [x] Emit bigger dust on hard landings.
 - [x] Add small screen shake on hard crash.
-- [ ] Add score popup for airtime and flip bonuses near the car.
+- [x] Add score popup for airtime and flip bonuses near the car.
 
 ## Code Changes Needed
 
@@ -111,15 +115,12 @@ Current runtime sprite folders:
 
 ## Recommended Implementation Order
 
-1. Generate a cleaner vehicle animation sprite sheet.
-2. Define named crop regions in `game.js`.
-3. Draw the car in layers instead of one full sprite.
-4. Add wheel rotation.
-5. Add driver leaning.
-6. Add suspension compression.
-7. Add exhaust smoke and wheel dust particles.
-8. Add landing and crash animation states.
-9. Tune physics using front/rear wheel contact points.
+1. Regenerate remaining vehicle body, driver, suspension, exhaust, and smoke as standalone transparent PNGs.
+2. Add independent front/rear suspension compression.
+3. Improve crash detection so flips are allowed in air but punished on bad landing.
+4. Add optional debug mode for crop boxes and wheel contact points.
+5. Decide whether to keep layered animation only or add full-frame driving/jump/crash animations.
+6. Move on to collectibles and fuel assets once vehicle assets are clean.
 
 ## Better Sprite Sheet Prompt
 

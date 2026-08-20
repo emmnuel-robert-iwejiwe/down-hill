@@ -4,11 +4,12 @@
 
 - A playable browser-based hill climbing game.
 - Canvas rendering for the sky, sun, terrain, coins, and car.
+- Layered vehicle image rendering for car body, driver, wheels, suspension, exhaust, and smoke.
 - Keyboard controls with `ArrowLeft` / `ArrowRight` and `A` / `D`.
 - Mobile touch controls for gas and brake.
-- HUD showing distance, coins, and fuel.
-- Game-over screen with restart.
-- Basic terrain physics, gravity, slope alignment, air rotation, coin pickup, fuel drain, and crash detection.
+- HUD showing distance, coins, score, fuel, and goal.
+- Countdown, pause/resume, game-over, and level-complete flow.
+- Terrain physics, gravity, front/rear wheel slope alignment, air rotation, coin pickup, fuel drain, fuel cans, crash detection, and finish goal.
 
 ## Best Next Improvements
 
@@ -24,10 +25,10 @@
 
 ### Feel And Physics
 
-- [ ] Tune acceleration, braking, drag, gravity, and max speed until driving feels more satisfying, add mite
-- [ ] Add wheel rotation so the car visually responds to movement.
-- [ ] Make uphill driving slower and downhill driving faster.
-- [ ] Add suspension bounce when landing.
+- [ ] Tune acceleration, braking, drag, gravity, and max speed until driving feels more satisfying.
+- [x] Add wheel rotation so the car visually responds to movement.
+- [x] Make uphill driving slower and downhill driving faster.
+- [x] Add suspension bounce when landing.
 - [ ] Improve crash detection so only hard flips or head impacts end the run.
 
 ### Progression
@@ -40,11 +41,11 @@
 
 ### Visuals
 
-- [ ] Replace the rectangle car with a more detailed vehicle sprite or richer canvas drawing.
+- [x] Replace the rectangle car with a more detailed vehicle sprite or richer canvas drawing.
 - [ ] Add parallax background layers like clouds, trees, mountains, or buildings.
 - [ ] Add animated coin shine.
 - [ ] Add fuel can, checkpoint, and finish-line visuals.
-- [ ] Add dust particles behind the wheels.
+- [x] Add dust particles behind the wheels.
 - [ ] Improve the HUD layout so it feels more like a finished mobile game.
 
 ### Audio
@@ -57,12 +58,12 @@
 
 ### Code Quality
 
-- [ ] Split `game.js` into smaller files, such as `car.js`, `terrain.js`, `items.js`, `input.js`, and `renderer.js`.
-- [ ] Use a single `gameState` object instead of many global variables.
-- [ ] Use elapsed frame time instead of assuming every animation frame has the same speed.
-- [ ] Add constants for physics values, colors, sizes, and spawn distances.
-- [ ] Regenerate terrain when restarting or moving into a new level.
-- [ ] Add comments only around the more complex physics and collision logic.
+- [x] Split `game.js` into smaller files, such as `car.js`, `terrain.js`, `items.js`, `input.js`, and `renderer.js`.
+- [x] Use a single `gameState` object instead of many global variables.
+- [x] Use elapsed frame time instead of assuming every animation frame has the same speed.
+- [x] Add constants for physics values, colors, sizes, and spawn distances.
+- [x] Regenerate terrain when restarting or moving into a new level.
+- [x] Add comments around the more complex physics and collision logic.
 
 ### Polish
 
@@ -75,10 +76,11 @@
 
 ## Recommended Build Order
 
-1. Add fuel cans and best score saving.
-2. Tune driving physics.
-3. Add better terrain variety.
-4. Add a title screen, pause, and clearer game-over screen.
-5. Add upgrades and progression.
-6. Improve art, animation, and audio.
-7. Split the JavaScript into smaller modules once the gameplay direction is clearer.
+1. Fix remaining vehicle asset quality, especially true transparent car body and driver files.
+2. Improve crash detection so flips are allowed in air but bad landings crash.
+3. Add best distance and total coins with `localStorage`.
+4. Replace coin and fuel placeholders with real asset files and animation.
+5. Add a title/start screen and better HUD styling.
+6. Add upgrades and progression.
+7. Add audio.
+8. Continue splitting only when a feature creates a real new boundary, such as upgrades, audio, or menus.

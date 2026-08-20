@@ -62,6 +62,8 @@ Implementation status:
 - [x] Exhaust smoke and wheel dust particles are active.
 - [x] Crash impact adds dust and screen shake.
 - [x] Split runtime sprites into individual transparent PNG files.
+- [ ] Regenerate car body, damaged body, flipped body, driver poses, suspension, exhaust, and smoke as true transparent standalone files. Current files work, but some came from generated sheets with baked-in dark backdrop.
+- [x] Regenerate front and rear wheels as clean standalone full tire images.
 
 ## Vehicle Animation Sprites
 
@@ -143,15 +145,15 @@ Implementation status:
 
 ## Effects
 
-- [ ] Dust cloud
-- [ ] Small dust
-- [ ] Large dust
-- [ ] Smoke
+- [x] Dust cloud
+- [x] Small dust
+- [x] Large dust
+- [x] Smoke
 - [ ] Explosion
 - [ ] Spark
 - [ ] Fire
-- [ ] Crash debris
-- [ ] Landing particles
+- [x] Crash debris
+- [x] Landing particles
 - [ ] Speed lines
 - [ ] Coin sparkle
 
@@ -224,13 +226,13 @@ assets/
 
 Start small so the game can switch from placeholder drawing to real assets quickly:
 
-- [ ] Car body
-- [ ] Front wheel
-- [ ] Rear wheel
-- [ ] Driver idle
+- [x] Car body
+- [x] Front wheel
+- [x] Rear wheel
+- [x] Driver idle
 - [ ] Coin animation frames
 - [ ] Fuel can
-- [ ] Dust cloud
+- [x] Dust cloud
 - [ ] Grass/dirt terrain textures
 - [ ] Tree
 - [ ] Cloud
@@ -246,3 +248,11 @@ Start small so the game can switch from placeholder drawing to real assets quick
 Recommended decision: generate the first visual asset pack, then download/license audio from a game SFX library.
 
 This gives us a consistent visual identity while avoiding spending too much time creating sound effects from scratch.
+
+## Next Asset Flow
+
+1. Regenerate the remaining vehicle body/driver/part files as true standalone transparent PNGs.
+2. Generate collectibles next: coin frames, gem, star, pickup sparkle, and burst particles.
+3. Generate fuel assets: fuel can, fuel pickup effect, empty indicator, and fuel bar.
+4. Generate terrain/background art as separate packs.
+5. Download or license audio after the visual style is stable.
